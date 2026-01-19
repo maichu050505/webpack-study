@@ -12,7 +12,7 @@ module.exports = {
         test: /\.css/, // 正規表現で.cssファイルを対象にする
         use: [
           {
-            loader: "style-loader", // style-loaderを使用してCSSをstyleタグに変換する。
+            loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
           },
           {
             loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
