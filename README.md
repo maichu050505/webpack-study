@@ -390,3 +390,45 @@ output: {
 - src/js/my.js, main.js
 - src/templates/index.html
   それぞれ、webpack.config.jsと、main.jsのパスを修正する。
+
+# Section7: 画像の読み込み
+
+- src/images/ディレクトリの中に、画像を用意する。
+- npm install --save-dev url-loader@latest でインストール
+- webpack.config.jsで、modulesのrulesの配列の中に、新しくtestを追加する。
+
+```js
+{
+test: /\.(png|jpg|gif|svg)/,
+use: [
+    {
+        loader: "url-loader",
+        options: {
+            esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
+        },
+        },
+    ],
+},
+```
+
+- templates/index.htmlの中で、imgタグを配置。<img src="<%= require('../images/icon.png') %>" />
+- これでビルドすると、dist内に画像ファイルが出力されないが、ブラウザで画像が表示される。画像のファイル名がものすごい長くなり、よろしくない。
+- そこで、file-loader をダウンロードする。npm install --save-dev file-loader@latest
+- webpack.config.jsで、先ほどのurl-loaderのところを、file-loaderに変更する。optionsに、name: "./images/[name].[ext]",を追加する。
+- ビルドすると、dist内に、画像ファイルが生成される。
+  つまり、url-loaderではなく、file-loaderを使う！！
+
+```js
+{
+    test: /\.(png|jpg|gif|svg)/,
+    use: [
+        {
+        loader: "file-loader",
+        options: {
+            esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
+            name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
+        },
+        },
+    ],
+},
+```

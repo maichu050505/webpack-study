@@ -23,6 +23,18 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.(png|jpg|gif|svg)/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
+              name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
