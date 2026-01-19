@@ -250,6 +250,8 @@ open -a "Google Chrome" ./dist/index.html
 
 # Section5: Webpackのプラグイン
 
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/05
+
 ## style-loaderの問題点：
 
 1、HTMLの肥大化
@@ -335,3 +337,56 @@ module.exports = {
 
 - そして、src/index.htmlを作成する。
 - ここで、npx webpack --mode developmentを実行してビルドすると、index.htmlが生成されるようになる。
+
+# Section6: ファイル構成を整える
+
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/06
+
+## distフォルダ内の不要なファイルを自動的に削除する
+
+npm install --sav-dev clean-webpack-plugin@latestでインストール。
+webpack.config.jsに、下記を追加し、pluginsの配列に、new CleanWebpackPlugin()を追加する。
+
+```js
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+```
+
+npx webpack --mode development でビルドすると、まず、dist内のファイルが全て削除されてから、新しいファイルが生成される。
+
+## 生成されるCSSファイル名を変更する
+
+webpack.config.jsの、new MiniCssExtractPlugin()の中で、CSSファイル名を設定する。ビルド前と同じファイル名にする。
+
+```js
+new MiniCssExtractPlugin({
+    filename: "./css/my.css", // 抽出したCSSファイルの名前を指定する
+}),
+```
+
+index.htmlに読み込む記述も自動で変更してくれる。
+
+## distフォルダの中を、cssやjsフォルダにまとめるには、webpack.config.jsで、パスを指定する。
+
+- CSS:
+
+```js
+new MiniCssExtractPlugin({
+    filename: "./css/my.css", // 抽出したCSSファイルの名前を指定する
+}),
+```
+
+- JS:
+
+```js
+output: {
+    path: path.resolve(__dirname, "./dist"), // 絶対パスを取得、__dirnameは現在のディレクトリ。
+    filename: "./js/main.js", // 出力するファイル名の変更。デフォルトはmain.js
+  },
+```
+
+## srcフォルダの中を整理する。distフォルダと同じ構成にする。
+
+- src/css/my.css
+- src/js/my.js, main.js
+- src/templates/index.html
+  それぞれ、webpack.config.jsと、main.jsのパスを修正する。

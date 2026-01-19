@@ -1,12 +1,13 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: "./src/js/main.js",
   output: {
     path: path.resolve(__dirname, "./dist"), // 絶対パスを取得、__dirnameは現在のディレクトリ。
-    filename: "main.js", // 出力するファイル名の変更。デフォルトはmain.js
+    filename: "./js/main.js", // 出力するファイル名の変更。デフォルトはmain.js
   },
   module: {
     rules: [
@@ -25,9 +26,12 @@ module.exports = {
     ],
   },
   plugins: [
-    new MiniCssExtractPlugin(),
-    new HtmlWebpackPlugin({
-      template: "./src/index.html", // 元となるHTMLファイル
+    new MiniCssExtractPlugin({
+      filename: "./css/main.css", // 抽出したCSSファイルの名前を指定する
     }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/index.html", // 元となるHTMLファイル
+    }),
+    new CleanWebpackPlugin(), // 出力先ディレクトリをビルド前にクリーンアップする
   ],
 };
