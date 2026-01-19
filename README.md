@@ -1,3 +1,6 @@
+Udemy: Webpackでウェブサイト制作のHTML/CSS/JSコーディングを一気に効率化する実践講座 (Mac / Win)で学んだことまとめ。
+https://www.udemy.com/course/webpack-config/
+
 # Section2
 
 要約
