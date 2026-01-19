@@ -1,4 +1,6 @@
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
@@ -12,7 +14,8 @@ module.exports = {
         test: /\.css/, // 正規表現で.cssファイルを対象にする
         use: [
           {
-            loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
+            // loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
+            loader: MiniCssExtractPlugin.loader, // MiniCssExtractPluginを使用してCSSを別ファイルに抽出する。
           },
           {
             loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
@@ -21,4 +24,10 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html", // 元となるHTMLファイル
+    }),
+  ],
 };

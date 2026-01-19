@@ -247,3 +247,91 @@ npx webpack --mode developmentを実行すると、dist/main.jsに、my.cssが�
 ターミナルでは、
 open -a "Google Chrome" ./dist/index.html
 を実行すると、Chromeで開く。
+
+# Section5: Webpackのプラグイン
+
+## style-loaderの問題点：
+
+1、HTMLの肥大化
+2、CSSが別ファイルではなく、HTMLの中にCSSの記述が入っている
+
+この問題を解決するために、Webpackのプラグインを使う。
+npm install --save-dev mini-css-extract-plugin@latest でインストール。
+webpack.config.jsに、下記を追加。
+moduleの下に、pluginsを追加し、moduleのloaderをMiniCssExtractPlugin.loaderに差し替え。
+
+```js
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "./dist"), // 絶対パスを取得、__dirnameは現在のディレクトリ。
+    filename: "main.js", // 出力するファイル名の変更。デフォルトはmain.js
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css/, // 正規表現で.cssファイルを対象にする
+        use: [
+          {
+            // loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
+            loader: MiniCssExtractPlugin.loader, // MiniCssExtractPluginを使用してCSSを別ファイルに抽出する。
+          },
+          {
+            loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
+          },
+        ],
+      },
+    ],
+  },
+  plugins: [new MiniCssExtractPlugin()], // 追加
+};
+```
+
+その後、npx webpack --mode development でビルドすると、dist/main.css　が生成される。
+そのため、index.htmlに、<link rel="stylesheet" href="./main.css" /> を追加して読み込む。
+
+## プラグインでHTMLを自動生成する方法
+
+- distの中身は直接編集すべきではない。編集するのはsrcの中だけ。
+- dist/index.htmlを直接編集しないために、html-webpack-pluginを使用する。
+  npm install --save-dev html-webpack-plugin@latestを実行。
+- webpack.config.jsに下記を追加。pluginsの配列に、HtmlWebpackPluginを追加。
+
+```js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  entry: "./src/index.js",
+  output: {
+    path: path.resolve(__dirname, "./dist"), // 絶対パスを取得、__dirnameは現在のディレクトリ。
+    filename: "main.js", // 出力するファイル名の変更。デフォルトはmain.js
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css/, // 正規表現で.cssファイルを対象にする
+        use: [
+          {
+            // loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
+            loader: MiniCssExtractPlugin.loader, // MiniCssExtractPluginを使用してCSSを別ファイルに抽出する。
+          },
+          {
+            loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
+          },
+        ],
+      },
+    ],
+  },
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html", // 元となるHTMLファイル
+    }),
+  ],
+};
+```
+
+- そして、src/index.htmlを作成する。
+- ここで、npx webpack --mode developmentを実行してビルドすると、index.htmlが生成されるようになる。
