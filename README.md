@@ -393,7 +393,7 @@ output: {
 
 # Section7: 画像の読み込み
 
-補足教材：
+補足教材：https://github.com/shunwitter/webpack_course/tree/5x/section/07
 
 - src/images/ディレクトリの中に、画像を用意する。
 - npm install --save-dev url-loader@latest でインストール
@@ -495,3 +495,49 @@ webpack.config.jsの、moduleのrulesのところを下記のようにする。
 ```
 
 - file-loaderとurl-loaderは不要なので、npm uninstall file-loader url-loader でアンインストールする。
+
+# 効率的なHTMLの制作方法
+
+- 補足教材：https://github.com/shunwitter/webpack_course/tree/5x/section/08
+
+## Pugを使って書く
+
+- npm install --save-dev pug-html-loader@latest でインストール
+- npm install --save-dev html-loader@latest でインストール
+- webpack.config.jsを更新。moduleのrulesのところに新しく{}を追加する。
+
+```js
+{
+  test: /\.pug$/,
+  use: [
+    {
+      loader: "html-loader",
+    },
+    {
+      loader: "pug-html-loader",
+      options: {
+        pretty: true, // Webpack5では、optionsが必要
+      },
+    },
+  ],
+},
+```
+
+- templates/index.pugを作成。
+  書き方の詳細：
+  https://pugjs.org/api/getting-started.html
+  サイドバーのTagsを見る。
+  pugは、HTMLの階層構造をインデントで表現する。インデントは半角スペース2個。
+
+```pug
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Template HTML
+  body
+    h1 Hello, Webpack!
+    img(src="../images/icon.png", alt="")
+    img(src="../images/thumbnail.jpg", alt="")
+```

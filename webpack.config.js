@@ -40,6 +40,20 @@ module.exports = {
           // },
         ],
       },
+      {
+        test: /\.pug$/,
+        use: [
+          {
+            loader: "html-loader",
+          },
+          {
+            loader: "pug-html-loader",
+            options: {
+              pretty: true, // Webpack 5ではoptionsを使って整形する必要がある。
+            },
+          },
+        ],
+      },
     ],
   },
   plugins: [
@@ -47,7 +61,7 @@ module.exports = {
       filename: "./css/main.css", // 抽出したCSSファイルの名前を指定する
     }),
     new HtmlWebpackPlugin({
-      template: "./src/templates/index.html", // 元となるHTMLファイル
+      template: "./src/templates/index.pug", // 元となるHTMLファイル
     }),
     new CleanWebpackPlugin(), // 出力先ディレクトリをビルド前にクリーンアップする
   ],
