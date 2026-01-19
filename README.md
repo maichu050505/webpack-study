@@ -393,6 +393,8 @@ output: {
 
 # Section7: 画像の読み込み
 
+補足教材：
+
 - src/images/ディレクトリの中に、画像を用意する。
 - npm install --save-dev url-loader@latest でインストール
 - webpack.config.jsで、modulesのrulesの配列の中に、新しくtestを追加する。
@@ -432,3 +434,64 @@ use: [
     ],
 },
 ```
+
+## file-loaderのnameに使えるオプション
+
+画像のファイル名のカスタマイズには、
+[name] [ext] 以外にも下記のようなものが使用できます。
+
+### [path]
+
+リソースへのパス。srcフォルダを参照してしまうので今回は不適切。
+
+### [folder]
+
+フォルダーの名前。
+images/about/icon.png のように画像フォルダの中にさらに階層を設けたい場合に最適です。
+
+### [query]
+
+?foo=bar のようなクエリストリングも含める場合。
+
+### [emoji]
+
+ランダムな絵文字が出力されます。
+使いどころが分からないおもしろ機能 😆
+[emoji:<length>]
+絵文字の数をコントロール。
+[emoji:2]と書くと絵文字が2つ出力されます。
+
+### [hash]
+
+ハッシュ値を自動生成してくれます。
+講座後半のキャッシュクリアのテクニックで使用します。
+
+### 公式ドキュメント：
+
+https://webpack.js.org/loaders/file-loader/#placeholders
+
+## Webpack5のAsset Modulesを使う。
+
+Webpack5では、file-loaderを使う必要がなく、Asset Modulesを使える。
+webpack.config.jsの、moduleのrulesのところを下記のようにする。
+
+```js
+{
+    test: /\.(png|jpg|gif|svg)/,
+    type: "asset/resource",
+    generator: {
+        filename: "images/[name][ext]", // 出力する画像ファイルの名前を指定する。.は使わない。[ext]の中に.が含まれるため。
+    },
+    use: [
+        // {
+        //   loader: "file-loader",
+        //   options: {
+        //     esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
+        //     name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
+        //   },
+        // },
+    ],
+},
+```
+
+- file-loaderとurl-loaderは不要なので、npm uninstall file-loader url-loader でアンインストールする。

@@ -2,6 +2,7 @@ const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { type } = require("os");
 
 module.exports = {
   entry: "./src/js/main.js",
@@ -25,14 +26,18 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|svg)/,
+        type: "asset/resource",
+        generator: {
+          filename: "images/[name][ext]", // 出力する画像ファイルの名前を指定する。.は使わない。[ext]の中に.が含まれるため。
+        },
         use: [
-          {
-            loader: "file-loader",
-            options: {
-              esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
-              name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
-            },
-          },
+          // {
+          //   loader: "file-loader",
+          //   options: {
+          //     esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
+          //     name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
+          //   },
+          // },
         ],
       },
     ],
