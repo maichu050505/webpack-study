@@ -544,3 +544,88 @@ html(lang="en")
     img(src="../images/icon.png", alt="")
     img(src="../images/thumbnail.jpg", alt="")
 ```
+
+## 複数のHTMLページを作る。
+
+- webpack.config.jsで、new HtmlWebpackPluginを追加する。
+
+```js
+new HtmlWebpackPlugin({
+  template: "./src/templates/index.pug", // 元となるHTMLファイル
+  filename: "index.html", // 出力するHTMLファイルの名前
+}),
+new HtmlWebpackPlugin({
+  template: "./src/templates/access.pug", // 元となるHTMLファイル
+  filename: "access.html", // 出力するHTMLファイルの名前
+}),
+```
+
+## 部分テンプレートを利用した効率化
+
+- templates/\_menu.pug を作成し、ヘッダーナビゲーションを書く。
+- templates/index.pugや、templates/access.pugから、
+
+```pug
+include _menu.pug
+```
+
+で読み込む。
+
+## テンプレート拡張を利用した効率化
+
+- templates/\_layout.pugを作成し、templates/access.pugの、
+
+```pug
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Access
+  body
+    include ./_menu.pug
+    block content
+```
+
+この部分を、切り取って貼り付けする。
+
+- templates/access.pugは、代わりに下記のコードで読み込み。templates/index.pugも同じ。
+
+```pug
+extends ./_layout.pug
+block content
+```
+
+## 変数を使ってHTMLをカスタマイズ
+
+- titleタグの中身をページごとに動的に設定する。
+- \_layout.pugに、
+
+```pug
+block locals
+  - var title = 'My Website';
+```
+
+と書き、実際のtitleタグを書くところは、
+
+```pug
+title #{title}
+```
+
+とする。
+
+- templates/index.pugで、下記を記載。
+
+```pug
+block locals
+  - var title = 'Home Page';
+```
+
+- また、templates/access.pugでは、下記を記載。
+
+```pug
+block locals
+  - var title = 'Access Page';
+```
+
+- Pugのドキュメント：https://pugjs.org/api/getting-started.html

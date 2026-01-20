@@ -62,6 +62,11 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: "./src/templates/index.pug", // 元となるHTMLファイル
+      filename: "index.html", // 出力するHTMLファイルの名前
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/templates/access.pug", // 元となるHTMLファイル
+      filename: "access.html", // 出力するHTMLファイルの名前
     }),
     new CleanWebpackPlugin(), // 出力先ディレクトリをビルド前にクリーンアップする
   ],
