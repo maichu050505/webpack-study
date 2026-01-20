@@ -629,3 +629,84 @@ block locals
 ```
 
 - Pugのドキュメント：https://pugjs.org/api/getting-started.html
+
+# Section9: ローカルサーバーを利用した開発
+
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/09
+
+- webpack-dev-server というライブラリを使ってローカルサーバーを起動する。
+- メリットの1つに Live Reload（変更があれば自動でリロードしてくれる機能）がある。
+- npm install --save-dev webpack-dev-server@latestで のインストール後、webpack.config.js に以下の内容を追加する。
+
+```js
+// 追加（もしなければ）
+const path = require("path");
+// ...省略
+
+module.exports = {
+  // 追加
+  devServer: {
+    static: path.resolve(__dirname, "src"),
+  },
+};
+```
+
+- npx webpack serve --mode=development を実行
+- http://localhost:8080/ が出るので、確認できる。
+- Live Reloadが使える。
+- \_menu.pugで、
+
+```pug
+a(href="./index.html") Home
+a(href="./access.html") Access
+```
+
+これを、こうできる！相対パスを意識しなくて良くなる。単にルート直下だから、/index.htmlのようにかける。（ルートパス）
+
+```pug
+a(href="/index.html") Home
+a(href="/access.html") Access
+```
+
+このように書かないと、\_menu.pugで問題が起こる。
+
+## webpack-dev-serverに関するTip
+
+- 実際にはdistを生成していないが、開発サーバーで変更がLive Reloadで見れる。
+- 最終的に開発が終わったら、npx webpack --mode production
+  を実行して、distを生成する。
+
+# Section10: Sassを使う
+
+- npm install --save-dev node-sass をインストールと言っているけど、これは古い。今は、
+- npm install --save-dev sass でインストールする。
+- npm install --save-dev sass-loader をインストール
+- ちなみに、短縮系は、npm i -D sass sass-loader でOK
+- webpack.config.jsの、moduleのrulesのuseに追加する。
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.(css|scss|sass)/,
+        use: [
+          {
+            // loader: "style-loader", // style-loaderを使用してCSSをHTMLの中にstyleタグに注入する。
+            loader: MiniCssExtractPlugin.loader, // MiniCssExtractPluginを使用してCSSを別ファイルに抽出する。
+          },
+          {
+            loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
+          },
+          {
+            loader: "sass-loader", // sass-loaderを使用してSassをCSSに変換する。
+          },
+        ],
+      },
+    ],
+  },
+};
+```
+
+- css/main.cssを、main.scssに変更。
+- js/main.jsで、main.cssをインポートしているところを、main.scssをインポートするように変更。
