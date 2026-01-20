@@ -2,8 +2,11 @@ const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const loader = require("sass-loader");
 
 module.exports = {
+  mode: "development", // productionにすると、ファイルが圧縮される。デフォルトはproduction。
+  devtool: "source-map",
   entry: "./src/js/main.js",
   output: {
     path: path.resolve(__dirname, "./dist"), // 絶対パスを取得、__dirnameは現在のディレクトリ。
@@ -11,6 +14,18 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: [
+              ["@babel/preset-env", { targets: "> 30%, not dead" }], // 30%以上のシェアを持つブラウザをターゲットにする設定
+            ],
+          },
+        },
+      },
       {
         test: /\.(css|scss|sass)/, // 正規表現で対象ファイルを指定する。
         use: [
@@ -20,6 +35,9 @@ module.exports = {
           },
           {
             loader: "css-loader", // css-loaderを使用してCSSを読み込む。loaderは下から順に適用されるので、順番が大事。
+            options: {
+              sourceMap: false, // trueにすると、ソースマップを有効にする。ただしファイルサイズが大きくなる。
+            },
           },
           {
             loader: "sass-loader", // sass-loaderを使用してSassをCSSに変換する。
@@ -27,7 +45,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpg|gif|svg)/,
+        test: /\.(png|jpe?g|gif|svg|webp)$/i,
         type: "asset/resource",
         generator: {
           filename: "images/[name][ext]", // 出力する画像ファイルの名前を指定する。.は使わない。[ext]の中に.が含まれるため。
@@ -38,6 +56,15 @@ module.exports = {
           //   options: {
           //     esModule: false, // 画像をHTMLに埋め込む際の設定。falseにしないと画像が表示されないことがある。
           //     name: "./images/[name].[ext]", // 出力する画像ファイルの名前を指定する
+          //   },
+          // },
+          // {
+          //   loader: "image-webpack-loader", // 画像を圧縮するローダー。今では古い。
+          //   options: {
+          //     mozjpeg: {
+          //       progressive: true,
+          //       quality: 65,
+          //     },
           //   },
           // },
         ],

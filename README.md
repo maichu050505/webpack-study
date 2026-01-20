@@ -678,6 +678,8 @@ a(href="/access.html") Access
 
 # Section10: Sassを使う
 
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/10
+
 - npm install --save-dev node-sass をインストールと言っているけど、これは古い。今は、
 - npm install --save-dev sass でインストールする。
 - npm install --save-dev sass-loader をインストール
@@ -710,3 +712,312 @@ module.exports = {
 
 - css/main.cssを、main.scssに変更。
 - js/main.jsで、main.cssをインポートしているところを、main.scssをインポートするように変更。
+
+# Section11: ES6
+
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/11
+
+- Bableを使って、新しいJavaScript(ES6)を、古いブラウザでも動く形に変換（トランスパイル）する。
+- 補足：昔のBabel（必須だった時代）
+  ・IE11 対応
+  ・古いAndroidブラウザ
+  ・ES5 しか動かない環境
+  👉 Babelは絶対必要
+- 今のBabel（2025年）
+  ブラウザ事情
+  Chrome / Edge / Safari / Firefox は ES2020 以降ほぼ対応
+  IEは完全終了
+  ES Modules が標準
+  👉 「変換しなくても動くJS」が増えた
+- 今のBabelの役割：
+  ・JSXを書きたい（React導入）
+  ・古いブラウザ対応が必要と言われた
+  ・「このJS、Safariで動かない」と実害が出た
+
+- Babelを使わない世界線も増えている
+  Vite / Next.js / Astro など内部で esbuild や swc を使用。
+  速くて設定不要。
+  Babelを「直接触らない」
+  👉 Babelは「消えた」ように見える理由
+
+- 下記をインストール。
+  npm i -D babel-loader @babel/core @babel/preset-env
+
+- webpack.config.jsに、modulesのrulesにtestを追加
+
+```js
+{
+  test: /\.js$/,
+  exclude: /node_modules/,
+  use: {
+    loader: "babel-loader",
+    options: {
+      presets: ["@babel/preset-env"],
+    },
+  },
+},
+```
+
+- そうすると、ビルドしたmy.jsがアロー関数ではなく、functionになっている。
+
+## 対象ブラウザを指定してトランスパイルする
+
+- preset-envにオプションを渡す。
+  webpack.config.jsで、下記のように記載。
+
+```js
+{
+  test: /\.js$/,
+  exclude: /node_modules/,
+  use: {
+    loader: "babel-loader",
+    options: {
+      presets: [
+        ["@babel/preset-env", { targets: "> 30%, not dead" }], // 30%以上のシェアを持つブラウザをターゲットにする設定
+      ],
+    },
+  },
+},
+```
+
+# Section12: コードのデバック方法
+
+補助教材：https://github.com/shunwitter/webpack_course/tree/5x/section/12
+
+## JSのソースマップ
+
+- webpack.config.jsonに、1行追加。
+
+```js
+module.exports = {
+  devtool: "source-map",
+};
+```
+
+- そうすると、コンソールで、自分が書いたJSをそのまま見れる。
+- 他にも、devtoolは色々指定できる。
+  https://webpack.js.org/configuration/devtool/
+
+## Sassのソースマップ
+
+- css-loaderにoptionを追加する。
+
+```js
+ {
+  loader: "css-loader",
+  // ここを追加！！
+  options: {
+    sourceMap: true, // ソースマップを有効にする。
+  },
+},
+```
+
+- そうすると、開発ツールの要素から、元のScssが見れる。
+- ただし、trueにすると、ファイルサイズが重くなるので、重くなる場合はfalseにする！！
+
+## modeオプション
+
+- 本番用にbuildするとき：プロダクションモード
+  npx webpack --mode production
+
+- 開発用にbuildするとき：developmentモード
+  npx webpack serve --mode=development
+
+- webpack.config.jsに、下記を追加すると、
+
+```js
+module.exports = {
+  mode: "development",
+};
+```
+
+npx webpackだけで、developmentモードでビルドされる。
+
+## package.jsonでのコマンド管理
+
+- package.jsonのscriptsを下記のように記載。
+
+```json
+"scripts": {
+   "start": "webpack-dev-server",
+    "build": "webpack --mode production",
+    "build:dev": "webpack"
+  },
+```
+
+- npm start とすると、webpackサーバーが立ちあがる。
+- npm run buildすると、本番用にビルドする。
+- npm run build:dev すると、devモードでビルドする。
+
+# Section13: 画像の最適化
+
+- npm i -D image-webpack-loader でインストール
+- webpack.config.jsに、のtest: 画像のところに、下記を追加。
+
+```js
+{
+  test: /\.(png|jpg|gif|svg)/,
+  type: "asset/resource",
+  generator: {
+    filename: "images/[name][ext]", // 出力する画像ファイルの名前を指定する。.は使わない。[ext]の中に.が含まれるため。
+  },
+  use: [
+   {
+    loader: "image-webpack-loader",
+    options: {
+      mozjpeg: {
+        progressive: true,
+        quality: 65,
+      },
+    },
+  },
+  ],
+},
+```
+
+- ただし、image-webpack-loaderはもう主流ではない！！
+  ・ビルド時に毎回圧縮するので遅くなる
+  ・dev / production 切り替えが面倒
+  ・エラー対応コストが高い
+- 実務では例えば、下記のようにする。
+  ・画像はsrc/images_raw/に未圧縮の画像を入れる。
+  ・npm run imgで、一括で圧縮&webpを作り、src/images/に入れる。
+  ・devサーバーは軽い。
+  ・開発後は納品前に、npm run buildする。npm run buildに、npm run imgを含める。
+  ・webpack.config.jsは、
+
+  ```js
+  {
+    test: /\.(png|jpe?g|gif|svg|webp)$/i,
+    type: "asset/resource",
+    generator: {
+      filename: "images/[name][ext]",
+    },
+  }
+  ```
+
+  ・設定方法：
+  1, npm i -D sharp でsharpをインストール
+  2, script/img.jsを作成。（WebP対応）
+
+  ```js
+  // scripts/img.js
+  const fs = require("fs");
+  const path = require("path");
+  const sharp = require("sharp");
+
+  const INPUT_DIR = path.resolve(__dirname, "../src/images_raw");
+  const OUTPUT_DIR = path.resolve(__dirname, "../src/images");
+
+  // 対象拡張子
+  const TARGET_EXTS = new Set([".jpg", ".jpeg", ".png"]);
+
+  function ensureDir(dir) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  function walk(dir) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const files = [];
+    for (const ent of entries) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) files.push(...walk(full));
+      else files.push(full);
+    }
+    return files;
+  }
+
+  function outPathFor(inputPath) {
+    const rel = path.relative(INPUT_DIR, inputPath);
+    return path.join(OUTPUT_DIR, rel);
+  }
+
+  function isUpToDate(input, outputs) {
+    if (!outputs.every(fs.existsSync)) return false;
+    const inTime = fs.statSync(input).mtimeMs;
+    return outputs.every((p) => fs.statSync(p).mtimeMs >= inTime);
+  }
+
+  async function optimizeOne(filePath) {
+    const ext = path.extname(filePath).toLowerCase();
+    if (!TARGET_EXTS.has(ext)) return { skipped: true };
+
+    const baseOut = outPathFor(filePath);
+    const webpOut = baseOut.replace(ext, ".webp");
+
+    ensureDir(path.dirname(baseOut));
+
+    // 更新チェック（元形式 + webp 両方）
+    if (isUpToDate(filePath, [baseOut, webpOut])) {
+      return { skipped: true };
+    }
+
+    const img = sharp(filePath);
+
+    // ---- 元形式（jpg/png） ----
+    if (ext === ".png") {
+      await img.png({ compressionLevel: 9, adaptiveFiltering: true }).toFile(baseOut);
+    } else {
+      await img.jpeg({ quality: 80, progressive: true, mozjpeg: true }).toFile(baseOut);
+    }
+
+    // ---- WebP ----
+    await img
+      .webp({
+        quality: 75,
+        effort: 4, // 圧縮効率（0-6）
+      })
+      .toFile(webpOut);
+
+    return { skipped: false };
+  }
+
+  (async () => {
+    ensureDir(INPUT_DIR);
+    ensureDir(OUTPUT_DIR);
+
+    const files = walk(INPUT_DIR);
+    if (files.length === 0) {
+      console.log("[img] No files in src/images_raw");
+      return;
+    }
+
+    let done = 0;
+    let skipped = 0;
+
+    for (const file of files) {
+      const ext = path.extname(file).toLowerCase();
+      if (!TARGET_EXTS.has(ext)) continue;
+
+      try {
+        const res = await optimizeOne(file);
+        if (res.skipped) skipped++;
+        else done++;
+      } catch (e) {
+        console.error("[img] Failed:", file);
+        console.error(e);
+        process.exitCode = 1;
+      }
+    }
+
+    console.log(`[img] optimized: ${done}, skipped: ${skipped}`);
+  })();
+  ```
+
+  3, package.jsonの、scriptsのbuildを書き換え、imgを追加。
+
+  ```json
+   "build": "npm run img && webpack --mode production",
+   "img": "node scripts/img.js"
+  ```
+
+  4、HTML側では、普通に、このように使う。
+
+  ```html
+  <picture>
+    <source srcset="images/hero.webp" type="image/webp" />
+    <img src="images/hero.jpg" alt="" />
+  </picture>
+  ```
+
+  使い方は、画像がきたら、images_rawに入れ、npm run imgする。最終的に、npm run buildすれば、npm run imgし忘れても大丈夫。
